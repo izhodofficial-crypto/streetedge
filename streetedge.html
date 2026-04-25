@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StreetEdge — Азия привезла. Алматы надело.</title>
+<meta name="description" content="StreetEdge — нишевые аксессуары из Азии в Алматы. Япония. Корея. Китай.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111214;
+    --fg: #E8E4E0;
+    --acid: #8B1A2E;
+    --burn: #C0392B;
+    --muted: #2C2C30;
+    --glass: rgba(139,26,46,0.06);
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Barlow', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--burn); }
+
+  /* SCROLL PROGRESS */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--acid);
+    width: 0%;
+    z-index: 9999;
+    transition: width 0.1s;
+  }
+
+  /* CUSTOM CURSOR */
+  #cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--burn);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, opacity 0.3s;
+    opacity: 0;
+    left: -100px;
+    top: -100px;
+  }
+  #cursor.expand {
+    width: 40px; height: 40px;
+  }
+  #cursor.active { opacity: 1; }
+  .cursor-trail {
+    position: fixed;
+    width: 5px; height: 5px;
+    background: var(--burn);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    left: -100px;
+    top: -100px;
+  }
+  .cursor-trail.active { opacity: 0.25; }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9990;
+    opacity: 0.06;
+  }
+
+  /* LOADING SCREEN */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 99997;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+  }
+  #loader-text {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 10vw, 100px);
+    color: var(--burn);
+    letter-spacing: 0.2em;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid var(--burn);
+    width: 0;
+    animation: typeout 1.5s steps(11) 0.3s forwards, blink 0.5s step-end 0.3s 3;
+  }
+  #loader-bar {
+    height: 100%;
+    background: var(--burn);
+    width: 0;
+    animation: loadbar 2s ease forwards 0.3s;
+  }
+  @keyframes loadbar { to { width: 100%; } }
+  #loader.hide {
+    animation: splitaway 0.5s ease forwards;
+  }
+  @keyframes splitaway {
+    0% { clip-path: inset(0 0 0 0); }
+    100% { clip-path: inset(0 0 100% 0); opacity: 0; }
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.3s;
+  }
+  nav.scrolled {
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(200,255,0,0.1);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--burn);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    position: relative;
+  }
+  .nav-logo::after {
+    content: 'SE';
+    position: absolute;
+    top: 0; left: 0;
+    color: var(--burn);
+    clip-path: inset(40% 0 40% 0);
+    animation: logoGlitch 6s infinite;
+  }
+  @keyframes logoGlitch {
+    0%,94%,100% { clip-path: inset(40% 0 40% 0); transform: translate(0); opacity: 0; }
+    95% { clip-path: inset(0% 0 60% 0); transform: translate(-3px,0); opacity: 1; }
+    97% { clip-path: inset(50% 0 0% 0); transform: translate(3px,0); opacity: 1; }
+    99% { clip-path: inset(20% 0 50% 0); transform: translate(0); opacity: 0; }
+  }
+  .nav-links {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--fg);
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    position: relative;
+    padding-bottom: 4px;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 1px;
+    background: var(--acid);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover::after { width: 100%; }
+  .nav-kaspi {
+    background: var(--acid);
+    color: #000 !important;
+    padding: 8px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    font-weight: 700;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .nav-kaspi:hover { background: var(--burn); color: #fff !important; transform: scale(1.02); }
+
+  /* HAMBURGER */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px; height: 2px;
+    background: var(--fg);
+    transition: all 0.3s;
+  }
+
+  /* MOBILE MENU */
+  #mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+  #mobile-menu.open { display: flex; }
+  #mobile-menu a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--fg);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    transition: color 0.2s;
+  }
+  #mobile-menu a:hover { color: var(--acid); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 100px 20px 0;
+  }
+
+  /* GRID BACKGROUND */
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(139,26,46,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(139,26,46,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform-style: preserve-3d;
+    perspective: 800px;
+  }
+
+  /* PARTICLES */
+  #particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: var(--burn);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    from { transform: translateY(100vh); opacity: 0.4; }
+    to { transform: translateY(-100px); opacity: 0; }
+  }
+
+  /* HERO TEXT */
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 15vw, 160px);
+    line-height: 0.9;
+    text-align: center;
+    letter-spacing: 0.05em;
+    position: relative;
+    z-index: 2;
+    color: var(--fg);
+    text-shadow:
+      4px 4px 0 rgba(139,26,46,0.4),
+      -2px -2px 0 rgba(192,57,43,0.2);
+    animation: heroGlitch 8s infinite;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+  }
+  @keyframes heroGlitch {
+    0%,89%,100% {
+      text-shadow: 4px 4px 0 rgba(139,26,46,0.4), -2px -2px 0 rgba(192,57,43,0.2);
+      transform: translate(0);
+    }
+    90% { text-shadow: -4px 0 var(--acid), 4px 0 var(--burn); transform: translate(-2px,0); }
+    91% { text-shadow: 4px 0 var(--burn), -4px 0 var(--acid); transform: translate(2px,0); }
+    92% { text-shadow: 4px 4px 0 rgba(139,26,46,0.4), -2px -2px 0 rgba(192,57,43,0.2); transform: translate(0); }
+  }
+
+  .hero-sub {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(20px, 4vw, 40px);
+    color: var(--fg);
+    letter-spacing: 0.15em;
+    text-align: center;
+    z-index: 2;
+    margin-top: 10px;
+    opacity: 0.7;
+  }
+  .hero-mono {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(10px, 1.5vw, 14px);
+    color: var(--acid);
+    letter-spacing: 0.3em;
+    text-align: center;
+    z-index: 2;
+    margin-top: 16px;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 20px;
+    margin-top: 40px;
+    z-index: 2;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-primary {
+    background: var(--acid);
+    color: #000;
+    padding: 16px 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--burn); color: #fff; transform: scale(1.02); }
+  .btn-outline {
+    border: 1px solid var(--fg);
+    color: var(--fg);
+    padding: 16px 32px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: var(--acid); color: var(--acid); transform: scale(1.02); }
+
+  /* TICKER */
+  .ticker-wrap {
+    width: 100%;
+    overflow: hidden;
+    background: var(--acid);
+    padding: 12px 0;
+    margin-top: 60px;
+    position: relative;
+    z-index: 2;
+  }
+  .ticker-wrap.dark {
+    background: transparent;
+    border-top: 1px solid var(--muted);
+    border-bottom: 1px solid var(--muted);
+  }
+  .ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 20s linear infinite;
+    gap: 0;
+  }
+  .ticker.reverse { animation: tickerRev 25s linear infinite; }
+  .ticker-item {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    color: #E8E4E0;
+    padding: 0 30px;
+    flex-shrink: 0;
+  }
+  .ticker-wrap.dark .ticker-item {
+    color: rgba(232,228,224,0.25);
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes tickerRev {
+    from { transform: translateX(-50%); }
+    to { transform: translateX(0); }
+  }
+
+  /* SECTIONS */
+  section {
+    padding: 100px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-full {
+    max-width: 100%;
+    padding: 100px 40px;
+  }
+
+  /* FADE IN OBSERVER */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--acid);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 80px);
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+
+  /* ABOUT */
+  #about {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 40px;
+  }
+  .about-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(100px, 15vw, 180px);
+    color: rgba(139,26,46,0.1);
+    line-height: 1;
+  }
+  .about-text p {
+    font-size: 18px;
+    line-height: 1.8;
+    color: rgba(240,240,240,0.7);
+    margin-bottom: 16px;
+  }
+  .stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--acid);
+    display: block;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(240,240,240,0.4);
+    letter-spacing: 0.2em;
+  }
+
+  /* PRODUCTS GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 60px;
+  }
+  .product-card {
+    background: var(--glass);
+    border: 1px solid var(--muted);
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+  .product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(200,255,0,0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .product-card:hover::before { opacity: 1; }
+  .product-card:hover {
+    border-color: rgba(200,255,0,0.3);
+    box-shadow: 0 0 30px rgba(200,255,0,0.05);
+  }
+  /* SHINE */
+  .product-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    transition: left 0.5s;
+    pointer-events: none;
+  }
+  .product-card:hover::after { left: 150%; }
+
+  .card-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #000;
+    background: var(--acid);
+    padding: 3px 8px;
+    display: inline-block;
+    margin-bottom: 20px;
+  }
+  .card-tag.orange { background: var(--burn); color: #fff; }
+  .card-tag.ghost {
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: rgba(240,240,240,0.3);
+  }
+  .card-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: rgba(240,240,240,0.5);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+  .card-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    color: var(--acid);
+    margin-bottom: 20px;
+    display: block;
+  }
+  .card-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--fg);
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    border-bottom: 1px solid var(--muted);
+    padding-bottom: 4px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .card-btn:hover { color: var(--acid); border-color: var(--acid); }
+
+  /* HOW IT WORKS */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-top: 60px;
+    position: relative;
+    align-items: flex-start;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 30px; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--acid), rgba(200,255,0,0.2), transparent);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 1.5s ease;
+  }
+  .steps.visible::before { transform: scaleX(1); }
+  .step {
+    flex: 1;
+    padding: 0 30px;
+    position: relative;
+  }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--acid);
+    margin-bottom: 16px;
+    display: block;
+  }
+  .step-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  .step-text {
+    font-size: 14px;
+    color: rgba(240,240,240,0.5);
+    line-height: 1.7;
+  }
+
+  /* WHY */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+  }
+  .why-card {
+    background: var(--glass);
+    border: 1px solid var(--muted);
+    padding: 40px;
+    transition: background 0.3s;
+  }
+  .why-card:hover { background: rgba(200,255,0,0.03); }
+  .why-icon { font-size: 32px; margin-bottom: 16px; display: block; }
+  .why-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+  .why-text { font-size: 14px; color: rgba(240,240,240,0.5); line-height: 1.7; }
+
+  /* COUNTDOWN */
+  #countdown-section {
+    background: linear-gradient(135deg, #0d0d0d, #111);
+    border-top: 1px solid rgba(200,255,0,0.1);
+    border-bottom: 1px solid rgba(200,255,0,0.1);
+    text-align: center;
+    padding: 100px 40px;
+  }
+  .countdown-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--acid);
+    letter-spacing: 0.5em;
+    margin-bottom: 20px;
+  }
+  .countdown-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 8vw, 80px);
+    margin-bottom: 40px;
+  }
+  .countdown-timer {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+  }
+  .countdown-unit {
+    text-align: center;
+  }
+  .countdown-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 120px);
+    color: var(--acid);
+    line-height: 1;
+    display: block;
+    min-width: 100px;
+  }
+  .countdown-unit-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: rgba(240,240,240,0.3);
+    letter-spacing: 0.3em;
+    margin-top: 8px;
+  }
+  .countdown-colon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(200,255,0,0.3);
+    line-height: 1;
+    animation: colonBlink 1s step-end infinite;
+  }
+  @keyframes colonBlink { 50% { opacity: 0; } }
+  .countdown-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: rgba(240,240,240,0.4);
+    letter-spacing: 0.2em;
+    margin-bottom: 40px;
+  }
+  .notify-input-wrap {
+    display: flex;
+    gap: 0;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .notify-input {
+    flex: 1;
+    background: var(--muted);
+    border: 1px solid rgba(200,255,0,0.2);
+    border-right: none;
+    color: var(--fg);
+    padding: 14px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+  .notify-input::placeholder { color: rgba(240,240,240,0.3); }
+  .notify-btn {
+    background: var(--acid);
+    color: #000;
+    border: none;
+    padding: 14px 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .notify-btn:hover { background: var(--burn); color: #fff; }
+
+  /* CONTACT / SOCIALS */
+  #contact {
+    padding: 100px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .social-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 60px;
+  }
+  .social-card {
+    background: var(--glass);
+    border: 1px solid var(--muted);
+    padding: 36px;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .social-card::after {
+    content: '↗';
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 20px;
+    color: rgba(200,255,0,0);
+    transition: color 0.3s, transform 0.3s;
+  }
+  .social-card:hover::after { color: var(--acid); transform: rotate(0deg) scale(1.2); }
+  .social-card:hover {
+    border-color: rgba(200,255,0,0.3);
+    background: rgba(200,255,0,0.03);
+    transform: translateY(-2px);
+  }
+  .social-icon {
+    font-size: 36px;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+  .social-card:hover .social-icon { transform: rotate(10deg) scale(1.1); }
+  .social-info { flex: 1; }
+  .social-platform {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--acid);
+    letter-spacing: 0.3em;
+    margin-bottom: 4px;
+  }
+  .social-handle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--fg);
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .social-desc {
+    font-size: 13px;
+    color: rgba(240,240,240,0.4);
+    line-height: 1.5;
+  }
+
+  /* KASPI FULL BUTTON */
+  .kaspi-btn-wrap {
+    margin-top: 40px;
+  }
+  .kaspi-big-btn {
+    display: block;
+    background: var(--acid);
+    color: #000;
+    text-align: center;
+    padding: 28px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 0.2em;
+    text-decoration: none;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .kaspi-big-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+    transition: left 0.5s;
+  }
+  .kaspi-big-btn:hover::before { left: 150%; }
+  .kaspi-big-btn:hover { background: var(--burn); color: #fff; transform: scale(1.01); }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--muted);
+    padding: 60px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 120px);
+    color: rgba(232,228,224,0.04);
+    letter-spacing: 0.1em;
+  }
+  .footer-info {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: rgba(232,228,224,0.3);
+    letter-spacing: 0.2em;
+    line-height: 2;
+  }
+  .footer-tagline {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: rgba(139,26,46,0.6);
+    letter-spacing: 0.4em;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    section { padding: 60px 20px; }
+    .section-full { padding: 60px 20px; }
+    #about { grid-template-columns: 1fr; padding: 60px 20px; }
+    .about-num { font-size: 80px; }
+    .products-grid { grid-template-columns: 1fr; }
+    .steps { flex-direction: column; gap: 40px; }
+    .steps::before { display: none; }
+    .step { padding: 0; }
+    .why-grid { grid-template-columns: 1fr; }
+    .social-grid { grid-template-columns: 1fr; }
+    .countdown-timer { gap: 10px; }
+    .countdown-colon { font-size: 60px; }
+    footer { padding: 40px 20px 30px; }
+    .hero-btns { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div id="loader-text">STREETEDGE</div>
+  <div id="loader-bar-wrap"><div id="loader-bar"></div></div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu">
+  <a href="#catalog" onclick="closeMobileMenu()">КАТАЛОГ</a>
+  <a href="#about" onclick="closeMobileMenu()">О НАС</a>
+  <a href="#countdown-section" onclick="closeMobileMenu()">ДРОП</a>
+  <a href="#contact" onclick="closeMobileMenu()">КОНТАКТ</a>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">SE</div>
+  <ul class="nav-links">
+    <li><a href="#catalog">Каталог</a></li>
+    <li><a href="#about">О нас</a></li>
+    <li><a href="#countdown-section">Дроп</a></li>
+    <li><a href="#contact">Контакт</a></li>
+  </ul>
+  <a href="https://kaspi.kz" target="_blank" class="nav-kaspi">Kaspi →</a>
+  <div class="hamburger" onclick="toggleMobileMenu()" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- THREE.JS 3D CANVAS -->
+<canvas id="three-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.5;"></canvas>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="grid-bg" id="grid-bg"></div>
+  <div id="particles"></div>
+
+  <h1 class="hero-title" id="hero-title">STREETEDGE</h1>
+  <p class="hero-sub">Азия привезла. Алматы надело.</p>
+  <p class="hero-mono">// Япония &nbsp;•&nbsp; Корея &nbsp;•&nbsp; Китай &nbsp;→&nbsp; Алматы //</p>
+
+  <div class="hero-btns">
+    <a href="https://kaspi.kz" target="_blank" class="btn-primary">КАТАЛОГ НА KASPI ↗</a>
+    <a href="#countdown-section" class="btn-outline">СЛЕДУЮЩИЙ ДРОП</a>
+  </div>
+
+  <!-- TICKER 1 -->
+  <div class="ticker-wrap" style="margin-top: 80px;">
+    <div class="ticker">
+      <span class="ticker-item">ROPE LACES</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">Y2K CHAINS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">JAPANESE CAPS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">KOREAN BAGS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">BALACLAVA</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">PRINTED SOCKS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">NEW DROP COMING</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">STREETEDGE 2026</span>
+      <span class="ticker-item">•</span>
+      <!-- duplicate for seamless loop -->
+      <span class="ticker-item">ROPE LACES</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">Y2K CHAINS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">JAPANESE CAPS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">KOREAN BAGS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">BALACLAVA</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">PRINTED SOCKS</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">NEW DROP COMING</span>
+      <span class="ticker-item">•</span>
+      <span class="ticker-item">STREETEDGE 2026</span>
+      <span class="ticker-item">•</span>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER 2 -->
+<div class="ticker-wrap dark" style="margin: 0;">
+  <div class="ticker reverse">
+    <span class="ticker-item">АЛМАТЫ</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">ТОКИО</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">СЕУЛ</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">ШАНХАЙ</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">БРУКЛИН</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">STREETEDGE 2026</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">АЛМАТЫ</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">ТОКИО</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">СЕУЛ</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">ШАНХАЙ</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">БРУКЛИН</span>
+    <span class="ticker-item">•</span>
+    <span class="ticker-item">STREETEDGE 2026</span>
+    <span class="ticker-item">•</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about" class="fade-in">
+  <div class="about-num">001</div>
+  <div class="about-text">
+    <div class="section-label">// О БРЕНДЕ</div>
+    <h2 class="section-title">МЫ НЕ МАГАЗИН.<br>МЫ — ФИЛЬТР.</h2>
+    <br>
+    <p>StreetEdge привозит то, чего нет в Казахстане. Аксессуары из Японии, Кореи и Китая — отобранные вручную для тех, кто понимает.</p>
+    <p>Не масса. Не базар. Только то, что реально носят на улицах Токио и Сеула.</p>
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num count-up" data-target="7">0</span>
+        <span class="stat-label">КАТЕГОРИЙ</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">×4</span>
+        <span class="stat-label">СРЕДНЯЯ НАЦЕНКА</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num count-up" data-target="0">0</span>
+        <span class="stat-label">₸ РИСКА</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<section id="catalog" style="max-width:1200px; margin: 0 auto;">
+  <div class="fade-in">
+    <div class="section-label">// КАТАЛОГ</div>
+    <h2 class="section-title">ЧТО МЫ ПРИВОЗИМ</h2>
+  </div>
+  <div class="products-grid">
+
+    <div class="product-card fade-in" data-tilt>
+      <span class="card-tag">HOT</span>
+      <span class="card-icon">👟</span>
+      <div class="card-title">ШНУРКИ & НОСКИ</div>
+      <p class="card-desc">Rope Laces из Японии. Носки с принтами из Кореи. То что делает разницу.</p>
+      <span class="card-price">от 1 500₸</span>
+      <a href="https://kaspi.kz" target="_blank" class="card-btn">Смотреть на Kaspi →</a>
+    </div>
+
+    <div class="product-card fade-in" data-tilt>
+      <span class="card-tag">BESTSELLER</span>
+      <span class="card-icon">🧢</span>
+      <div class="card-title">БАЛАКЛАВЫ & КЕПКИ</div>
+      <p class="card-desc">6-panel кепки японского силуэта. Балаклавы которые носят в Сеуле.</p>
+      <span class="card-price">от 4 000₸</span>
+      <a href="https://kaspi.kz" target="_blank" class="card-btn">Смотреть на Kaspi →</a>
+    </div>
+
+    <div class="product-card fade-in" data-tilt>
+      <span class="card-tag orange">Y2K</span>
+      <span class="card-icon">⛓️</span>
+      <div class="card-title">ЦЕПОЧКИ & УКРАШЕНИЯ</div>
+      <p class="card-desc">Chunky chains. Y2K металл. Детали которые делают аутфит.</p>
+      <span class="card-price">от 3 500₸</span>
+      <a href="https://kaspi.kz" target="_blank" class="card-btn">Смотреть на Kaspi →</a>
+    </div>
+
+    <div class="product-card fade-in" data-tilt>
+      <span class="card-tag">PREMIUM</span>
+      <span class="card-icon">🎒</span>
+      <div class="card-title">СУМКИ & РЮКЗАКИ</div>
+      <p class="card-desc">Crossbody, поясные сумки. Корейский минимализм в каждой детали.</p>
+      <span class="card-price">от 8 000₸</span>
+      <a href="https://kaspi.kz" target="_blank" class="card-btn">Смотреть на Kaspi →</a>
+    </div>
+
+    <div class="product-card fade-in" style="opacity: 0.5; filter: blur(1px);" data-tilt>
+      <span class="card-tag ghost">СКОРО</span>
+      <span class="card-icon">🔒</span>
+      <div class="card-title">UPCOMING DROP</div>
+      <p class="card-desc">Следующий дроп. Подпишись чтобы узнать первым.</p>
+      <span class="card-price">???</span>
+      <a href="#countdown-section" class="card-btn">Уведомить меня →</a>
+    </div>
+
+    <div class="product-card fade-in" data-tilt>
+      <span class="card-tag ghost">2026</span>
+      <span class="card-icon">🤝</span>
+      <div class="card-title">КОЛЛАБОРАЦИИ</div>
+      <p class="card-desc">Совместные проекты с локальными брендами Алматы. Скоро.</p>
+      <span class="card-price">TBA</span>
+      <a href="#contact" class="card-btn">Узнать больше →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-full fade-in" style="background: #0a0a0a; padding: 100px 40px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div class="section-label">// ПРОЦЕСС</div>
+    <h2 class="section-title">ОТ ТОКИО ДО ТВОЕЙ ДВЕРИ</h2>
+    <div class="steps" id="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <div class="step-title">МЫ НАХОДИМ</div>
+        <p class="step-text">Мониторим 1688, Taobao, Musinsa, Zozotown — находим то, чего нет в Казахстане. Каждый товар отбирается вручную.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <div class="step-title">МЫ ПРИВОЗИМ</div>
+        <p class="step-text">Карго доставка Китай / Япония / Корея → Алматы. 14–21 день. Каждый товар проверен лично до отправки.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <div class="step-title">ТЫ ПОКУПАЕШЬ</div>
+        <p class="step-text">Через Kaspi.kz с рассрочкой без переплат. Быстрая доставка по всему Казахстану прямо до двери.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section style="max-width:1200px; margin: 0 auto;">
+  <div class="fade-in">
+    <div class="section-label">// ПОЧЕМУ МЫ</div>
+    <h2 class="section-title">РАЗНИЦА</h2>
+  </div>
+  <div class="why-grid fade-in">
+    <div class="why-card">
+      <span class="why-icon">⚡</span>
+      <div class="why-title">ЭКСКЛЮЗИВНОСТЬ</div>
+      <p class="why-text">Этого нет ни у кого на Kaspi. Мы привозим нишевое — не то, что уже везде продаётся.</p>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">👁</span>
+      <div class="why-title">КАЧЕСТВО</div>
+      <p class="why-text">Каждая вещь отобрана вручную. Мы сами проверяем всё до отправки. Никакого рандома.</p>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">🏴</span>
+      <div class="why-title">КУЛЬТУРА</div>
+      <p class="why-text">Мы из среды. Знаем что реально носят. Не просто магазин — кураторский взгляд изнутри.</p>
+    </div>
+    <div class="why-card">
+      <span class="why-icon">💳</span>
+      <div class="why-title">РАССРОЧКА</div>
+      <p class="why-text">Через Kaspi без переплат. Раздели любую покупку на несколько месяцев — удобно и выгодно.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COUNTDOWN -->
+<div id="countdown-section" class="fade-in">
+  <div class="countdown-label">// СЛЕДУЮЩИЙ ДРОП</div>
+  <h2 class="countdown-title">DROP 001 COMING</h2>
+  <div class="countdown-timer">
+    <div class="countdown-unit">
+      <span class="countdown-num" id="cd-days">00</span>
+      <div class="countdown-unit-label">ДНЕЙ</div>
+    </div>
+    <div class="countdown-colon">:</div>
+    <div class="countdown-unit">
+      <span class="countdown-num" id="cd-hours">00</span>
+      <div class="countdown-unit-label">ЧАСОВ</div>
+    </div>
+    <div class="countdown-colon">:</div>
+    <div class="countdown-unit">
+      <span class="countdown-num" id="cd-mins">00</span>
+      <div class="countdown-unit-label">МИНУТ</div>
+    </div>
+    <div class="countdown-colon">:</div>
+    <div class="countdown-unit">
+      <span class="countdown-num" id="cd-secs">00</span>
+      <div class="countdown-unit-label">СЕКУНД</div>
+    </div>
+  </div>
+  <p class="countdown-sub">Rope Laces Vol.2 + Новые кепки + Surprise item</p>
+  <div class="notify-input-wrap">
+    <input type="text" class="notify-input" placeholder="Твой Instagram @...">
+    <button class="notify-btn" onclick="handleNotify()">УВЕДОМИТЬ →</button>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div id="contact">
+  <div class="fade-in">
+    <div class="section-label">// КОНТАКТ</div>
+    <h2 class="section-title">МЫ ЗДЕСЬ</h2>
+  </div>
+
+  <div class="social-grid fade-in">
+
+    <a href="https://wa.me/77002915851" target="_blank" class="social-card">
+      <div class="social-icon">💬</div>
+      <div class="social-info">
+        <div class="social-platform">WHATSAPP</div>
+        <div class="social-handle">+7 700 291 58 51</div>
+        <div class="social-desc">Пишем по заказам и вопросам. Отвечаем быстро.</div>
+      </div>
+    </a>
+
+    <a href="https://t.me/streetedge" target="_blank" class="social-card">
+      <div class="social-icon">✈️</div>
+      <div class="social-info">
+        <div class="social-platform">TELEGRAM</div>
+        <div class="social-handle">@streetedge</div>
+        <div class="social-desc">Канал с новинками, дропами и закулисьем.</div>
+      </div>
+    </a>
+
+    <a href="https://instagram.com/streetedge" target="_blank" class="social-card">
+      <div class="social-icon">📸</div>
+      <div class="social-info">
+        <div class="social-platform">INSTAGRAM</div>
+        <div class="social-handle">@streetedge</div>
+        <div class="social-desc">Фото, аутфиты, новые позиции и стрит контент.</div>
+      </div>
+    </a>
+
+    <a href="https://tiktok.com/@streetedge" target="_blank" class="social-card">
+      <div class="social-icon">🎵</div>
+      <div class="social-info">
+        <div class="social-platform">TIKTOK</div>
+        <div class="social-handle">@streetedge</div>
+        <div class="social-desc">Видео, распаковки, стрит контент из Алматы.</div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="kaspi-btn-wrap fade-in">
+    <a href="https://kaspi.kz" target="_blank" class="kaspi-big-btn">
+      🛒 СМОТРЕТЬ МАГАЗИН НА KASPI →
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">STREETEDGE</div>
+  <div class="footer-info">
+    Алматы, Казахстан • 2026<br>
+    Импорт нишевых аксессуаров из Азии<br>
+    +7 700 291 58 51
+  </div>
+  <div class="footer-tagline">// WEAR WHAT THEY DON'T HAVE //</div>
+</footer>
+
+<script>
+// LOADER
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    loader.classList.add('hide');
+    setTimeout(() => { loader.style.display = 'none'; }, 500);
+  }, 2600);
+});
+
+// CURSOR
+const cursor = document.getElementById('cursor');
+const trails = [];
+const TRAIL_COUNT = 4;
+for (let i = 0; i < TRAIL_COUNT; i++) {
+  const t = document.createElement('div');
+  t.className = 'cursor-trail';
+  document.body.appendChild(t);
+  trails.push({ el: t, x: -100, y: -100 });
+}
+let mouseX = -100, mouseY = -100;
+let cursorActive = false;
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top = mouseY + 'px';
+  if (!cursorActive) {
+    cursorActive = true;
+    cursor.classList.add('active');
+    trails.forEach(t => t.el.classList.add('active'));
+  }
+});
+function animateTrails() {
+  let px = mouseX, py = mouseY;
+  trails.forEach((t, i) => {
+    t.x += (px - t.x) * 0.3;
+    t.y += (py - t.y) * 0.3;
+    t.el.style.left = t.x + 'px';
+    t.el.style.top = t.y + 'px';
+    px = t.x; py = t.y;
+  });
+  requestAnimationFrame(animateTrails);
+}
+animateTrails();
+document.querySelectorAll('a, button, .product-card').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('expand'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('expand'));
+});
+
+// SCROLL PROGRESS
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  document.getElementById('progress-bar').style.width = (scrolled / total * 100) + '%';
+  // NAV
+  const nav = document.getElementById('navbar');
+  nav.classList.toggle('scrolled', scrolled > 50);
+});
+
+// PARTICLES
+const particleContainer = document.getElementById('particles');
+for (let i = 0; i < 25; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (8 + Math.random() * 12) + 's';
+  p.style.animationDelay = (Math.random() * 10) + 's';
+  p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+  particleContainer.appendChild(p);
+}
+
+// PARALLAX HERO
+document.addEventListener('mousemove', e => {
+  const xPct = (e.clientX / window.innerWidth - 0.5) * 10;
+  const yPct = (e.clientY / window.innerHeight - 0.5) * 10;
+  const title = document.getElementById('hero-title');
+  if (title) title.style.transform = `rotateY(${xPct * 0.5}deg) rotateX(${-yPct * 0.3}deg)`;
+  const grid = document.getElementById('grid-bg');
+  if (grid) grid.style.transform = `translateX(${xPct * 2}px) translateY(${yPct * 2}px)`;
+});
+
+// FADE IN OBSERVER
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      // count up
+      e.target.querySelectorAll('.count-up').forEach(el => {
+        const target = parseInt(el.dataset.target);
+        let current = 0;
+        const step = Math.ceil(target / 30);
+        const timer = setInterval(() => {
+          current = Math.min(current + step, target);
+          el.textContent = current;
+          if (current >= target) clearInterval(timer);
+        }, 50);
+      });
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// STEPS LINE OBSERVER
+const stepsObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.3 });
+const stepsEl = document.getElementById('steps');
+if (stepsEl) stepsObserver.observe(stepsEl);
+
+// 3D CARD TILT
+document.querySelectorAll('[data-tilt]').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    const rx = (y - cy) / cy * -10;
+    const ry = (x - cx) / cx * 10;
+    card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+    card.style.transition = 'transform 0.5s ease';
+  });
+  card.addEventListener('mouseenter', () => {
+    card.style.transition = 'transform 0.1s ease';
+  });
+});
+
+// COUNTDOWN
+function updateCountdown() {
+  const dropDate = new Date();
+  dropDate.setDate(dropDate.getDate() + 30);
+  const now = new Date();
+  const diff = dropDate - now;
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  const secs = Math.floor((diff % 60000) / 1000);
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('cd-days').textContent = pad(days);
+  document.getElementById('cd-hours').textContent = pad(hours);
+  document.getElementById('cd-mins').textContent = pad(mins);
+  document.getElementById('cd-secs').textContent = pad(secs);
+}
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+// NOTIFY
+function handleNotify() {
+  const input = document.querySelector('.notify-input');
+  if (input.value.trim()) {
+    input.value = '';
+    const btn = document.querySelector('.notify-btn');
+    btn.textContent = 'ГОТОВО ✓';
+    btn.style.background = '#00cc44';
+    setTimeout(() => {
+      btn.textContent = 'УВЕДОМИТЬ →';
+      btn.style.background = '';
+    }, 3000);
+  }
+}
+
+// MOBILE MENU
+function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+}
+</script>
+
+<!-- THREE.JS 3D SCENE -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function() {
+  const canvas = document.getElementById('three-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 10);
+
+  // BURGUNDY MATERIALS
+  const wireMat = new THREE.MeshBasicMaterial({ color: 0x8B1A2E, wireframe: true, transparent: true, opacity: 0.5 });
+  const wireMat2 = new THREE.MeshBasicMaterial({ color: 0xC0392B, wireframe: true, transparent: true, opacity: 0.3 });
+  const wireMat3 = new THREE.MeshBasicMaterial({ color: 0x5a0f1e, wireframe: true, transparent: true, opacity: 0.4 });
+
+  // FLOATING OBJECTS GROUP
+  const objects = [];
+
+  // Big icosahedron center
+  const icoGeo = new THREE.IcosahedronGeometry(2.2, 1);
+  const ico = new THREE.Mesh(icoGeo, wireMat);
+  ico.position.set(4, 0.5, -2);
+  scene.add(ico);
+  objects.push({ mesh: ico, rx: 0.003, ry: 0.005, rz: 0.002, floatSpeed: 0.8, floatAmp: 0.3 });
+
+  // Torus knot
+  const tkGeo = new THREE.TorusKnotGeometry(1.2, 0.35, 80, 12);
+  const tk = new THREE.Mesh(tkGeo, wireMat2);
+  tk.position.set(-4.5, 1, -1);
+  scene.add(tk);
+  objects.push({ mesh: tk, rx: 0.004, ry: 0.003, rz: 0.005, floatSpeed: 1.1, floatAmp: 0.4 });
+
+  // Octahedron top right
+  const octGeo = new THREE.OctahedronGeometry(1.0, 0);
+  const oct = new THREE.Mesh(octGeo, wireMat);
+  oct.position.set(6, 3, -3);
+  scene.add(oct);
+  objects.push({ mesh: oct, rx: 0.006, ry: 0.004, rz: 0.003, floatSpeed: 1.4, floatAmp: 0.25 });
+
+  // Small torus bottom left
+  const torGeo = new THREE.TorusGeometry(0.8, 0.25, 12, 40);
+  const tor = new THREE.Mesh(torGeo, wireMat3);
+  tor.position.set(-5.5, -2.5, -1);
+  scene.add(tor);
+  objects.push({ mesh: tor, rx: 0.005, ry: 0.007, rz: 0.002, floatSpeed: 0.9, floatAmp: 0.35 });
+
+  // Tetrahedron center-left
+  const tetGeo = new THREE.TetrahedronGeometry(0.9, 0);
+  const tet = new THREE.Mesh(tetGeo, wireMat2);
+  tet.position.set(-2, -3, 0);
+  scene.add(tet);
+  objects.push({ mesh: tet, rx: 0.007, ry: 0.003, rz: 0.006, floatSpeed: 1.2, floatAmp: 0.2 });
+
+  // Extra small icosahedron
+  const ico2Geo = new THREE.IcosahedronGeometry(0.6, 0);
+  const ico2 = new THREE.Mesh(ico2Geo, wireMat);
+  ico2.position.set(2.5, 3.5, -1);
+  scene.add(ico2);
+  objects.push({ mesh: ico2, rx: 0.009, ry: 0.006, rz: 0.004, floatSpeed: 1.6, floatAmp: 0.15 });
+
+  // Big wireframe sphere background
+  const sphGeo = new THREE.SphereGeometry(7, 16, 12);
+  const sph = new THREE.Mesh(sphGeo, new THREE.MeshBasicMaterial({ color: 0x3d0a14, wireframe: true, transparent: true, opacity: 0.08 }));
+  sph.position.set(0, 0, -6);
+  scene.add(sph);
+  objects.push({ mesh: sph, rx: 0.001, ry: 0.002, rz: 0, floatSpeed: 0, floatAmp: 0 });
+
+  // MOUSE PARALLAX
+  let mouseX = 0, mouseY = 0;
+  let targetX = 0, targetY = 0;
+  document.addEventListener('mousemove', e => {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  // SCROLL
+  let scrollY = 0;
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+  // ANIMATE
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    // smooth mouse follow
+    targetX += (mouseX - targetX) * 0.05;
+    targetY += (mouseY - targetY) * 0.05;
+
+    // camera subtle move
+    camera.position.x = targetX * 1.5;
+    camera.position.y = -targetY * 1.0 - scrollY * 0.003;
+    camera.lookAt(0, -scrollY * 0.002, 0);
+
+    // rotate and float each object
+    objects.forEach((obj, i) => {
+      obj.mesh.rotation.x += obj.rx;
+      obj.mesh.rotation.y += obj.ry;
+      obj.mesh.rotation.z += obj.rz;
+      if (obj.floatAmp > 0) {
+        obj.mesh.position.y += Math.sin(t * obj.floatSpeed + i) * obj.floatAmp * 0.01;
+      }
+    });
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  // RESIZE
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+</script>
+</body>
+</html>
